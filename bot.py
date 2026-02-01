@@ -14,7 +14,7 @@ SUPPORT = "https://t.me/quotexcompany_support"
 WELCOME_IMAGE = "welcome.jpg"
 
 # ================== Состояние пользователей ==================
-# Ключ: user_id, Значение: stack меню (список)
+# ключ: user_id, значение: стек меню (список экранов)
 user_states = {}
 
 # ================== КЛАВИАТУРЫ ==================
@@ -80,21 +80,24 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "back":
         if len(user_states[user_id]) > 1:
             user_states[user_id].pop()  # убираем текущее меню
-        current_menu = user_states[user_id][-1]
-        await show_menu(query, current_menu)
+        await show_menu(query, user_states[user_id][-1])
         return
 
-    # ===== Новые экраны =====
-    if data == "courses":
-        user_states[user_id].append("courses")
-    elif data.startswith("course_"):
-        user_states[user_id].append(f"course_{data[-1]}")  # course_1, course_2, course_3
-    elif data.startswith("pay_"):
-        user_states[user_id].append(f"pay_{data.split('_')[1]}_{data.split('_')[2]}")
-    elif data == "support":
-        user_states[user_id].append("support")
+    # ===== Переход на новый экран =====
+    new_screen = None
 
-    await show_menu(query, user_states[user_id][-1])
+    if data == "courses":
+        new_screen = "courses"
+    elif data.startswith("course_"):
+        new_screen = data
+    elif data.startswith("pay_"):
+        new_screen = data
+    elif data == "support":
+        new_screen = "support"
+
+    if new_screen:
+        user_states[user_id].append(new_screen)
+        await show_menu(query, new_screen)
 
 # ================== Функция показа меню ==================
 
@@ -191,7 +194,7 @@ async def show_menu(query, menu_id):
             reply_markup=support_menu()
         )
 
-# ================== ТЕКСТОВЫЕ СООБЩЕНИЯ ==================
+# ================== ТЕКСТ ==================
 
 async def messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
