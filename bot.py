@@ -28,7 +28,7 @@ def courses_menu():
         [InlineKeyboardButton("🟢 Криптотрейдинг с нуля", callback_data="course_1")],
         [InlineKeyboardButton("🔵 Проф трейдинг и аналитика", callback_data="course_2")],
         [InlineKeyboardButton("🔴 VIP Мастер трейдинга", callback_data="course_3")],
-        [InlineKeyboardButton("🔙 Назад", callback_data="back_main")]
+        [InlineKeyboardButton("🔙 Назад", callback_data=f"courses")]
     ])
 
 
@@ -146,7 +146,7 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("👨‍💼 Менеджер", url=SUPPORT)],
-                [InlineKeyboardButton("🔙 Назад", callback_data=f"course_{course_id}")]
+                [InlineKeyboardButton("🔙 Назад", callback_data="courses")]
             ])
         )
 
