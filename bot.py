@@ -1,3 +1,4 @@
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
 from telegram.ext import (
     ApplicationBuilder,
@@ -8,7 +9,7 @@ from telegram.ext import (
     filters
 )
 
-TOKEN = "8355170860:AAGmyZFOqV1TacOyx3Fot_JoyJPZDLN2oFk"
+TOKEN = os.environ.get("BOT_TOKEN")
 SUPPORT = "https://t.me/quotexcompany_support"
 WELCOME_IMAGE = "welcome.jpg"
 
