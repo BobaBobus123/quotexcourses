@@ -37,7 +37,7 @@ def payment_menu(course_id):
         [InlineKeyboardButton("💳 Оплатить USDT", callback_data=f"pay_usdt_{course_id}")],
         [InlineKeyboardButton("₽ Оплатить в рублях", callback_data=f"pay_rub_{course_id}")],
         [InlineKeyboardButton("👨‍💼 Написать менеджеру", url=SUPPORT)],
-        [InlineKeyboardButton("🔙 Назад", callback_data=f"course_{course_id}")]
+        [InlineKeyboardButton("🔙 Назад", callback_data="back_courses")]
     ])
 
 
@@ -79,6 +79,13 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML",
             reply_markup=courses_menu()
         )
+    elif data == "back_courses":
+        await query.edit_message_caption(
+        caption="🎓 <b>Наши курсы</b>\n\nВыберите подходящий уровень:",
+        parse_mode="HTML",
+        reply_markup=courses_menu()
+    )
+
 
     # --- Курс 1 ---
     elif data == "course_1":
