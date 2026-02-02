@@ -5,14 +5,12 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 
-
 TOKEN = os.environ.get("BOT_TOKEN")
 CHANNEL_LINK = "https://t.me/quotextradenews"
 REVIEWS_CHANNEL = "https://t.me/+7FvjGCCQ4ng4MGM8"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
 CONTACT = "@quotexcompany_support"
 WELCOME_IMAGE = "start1.jpg"
-
 
 bot = Bot(
     token=TOKEN,
@@ -21,7 +19,6 @@ bot = Bot(
 dp = Dispatcher()
 
 # ---------- Главное меню ----------
-
 def main_menu():
     return types.InlineKeyboardMarkup(inline_keyboard=[
         [
@@ -50,7 +47,6 @@ def main_menu():
     ])
 
 # ---------- /start ----------
-
 @dp.message(CommandStart())
 async def start(message: types.Message):
     text = (
@@ -65,30 +61,30 @@ async def start(message: types.Message):
     )
 
     photo = types.FSInputFile(WELCOME_IMAGE)
-    sent_message = await message.reply_photo(
+    await message.answer_photo(
         photo=photo,
         caption=text,
-        parse_mode=ParseMode.MARKDOWN,
         reply_markup=main_menu()
     )
 
-
 # ---------- Универсальная кнопка Назад ----------
-
 def back_kb():
     return types.InlineKeyboardMarkup(inline_keyboard=[
         [types.InlineKeyboardButton(text="⬅️ Назад в меню", callback_data="back")]
     ])
 
+async def edit_message(call: types.CallbackQuery, text: str, keyboard: types.InlineKeyboardMarkup):
+    if call.message.photo:  # Если сообщение с фото
+        await call.message.edit_caption(caption=text, reply_markup=keyboard)
+    else:  # Если обычное текстовое
+        await call.message.edit_text(text=text, reply_markup=keyboard)
+
 @dp.callback_query(lambda c: c.data == "back")
 async def back(call: types.CallbackQuery):
-    await call.message.edit_text(
-        "🏠 *Главное меню*\n\nВыбери нужный раздел 👇",
-        reply_markup=main_menu()
-    )
+    text = "🏠 *Главное меню*\n\nВыбери нужный раздел 👇"
+    await edit_message(call, text, main_menu())
 
 # ---------- Разделы ----------
-
 @dp.callback_query(lambda c: c.data == "about")
 async def about(call):
     text = (
@@ -101,7 +97,7 @@ async def about(call):
         "📚 анализе данных\n"
         "🧠 принятии решений\n"
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
+    await edit_message(call, text, back_kb())
 
 @dp.callback_query(lambda c: c.data == "study")
 async def study(call):
@@ -114,7 +110,7 @@ async def study(call):
         "📊 реальные кейсы\n\n"
         "Без воды. Только то, что работает."
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
+    await edit_message(call, text, back_kb())
 
 @dp.callback_query(lambda c: c.data == "method")
 async def method(call):
@@ -127,7 +123,7 @@ async def method(call):
         "🧠 психологию трейдинга\n\n"
         "Это системный подход, а не сигналы."
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
+    await edit_message(call, text, back_kb())
 
 @dp.callback_query(lambda c: c.data == "results")
 async def results(call):
@@ -139,7 +135,7 @@ async def results(call):
         "✔ не зависят от чужих прогнозов\n\n"
         "Главный результат — мышление трейдера 🧠"
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
+    await edit_message(call, text, back_kb())
 
 @dp.callback_query(lambda c: c.data == "knowledge")
 async def knowledge(call):
@@ -151,7 +147,7 @@ async def knowledge(call):
         "📉 примеры сделок\n"
         "🧮 формулы риска\n"
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
+    await edit_message(call, text, back_kb())
 
 @dp.callback_query(lambda c: c.data == "faq")
 async def faq(call):
@@ -164,9 +160,7 @@ async def faq(call):
         "— Есть гарантии прибыли?\n"
         "Нет. Есть знания и система."
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
-
-# ---------- Прозрачность (анти-скам блок) ----------
+    await edit_message(call, text, back_kb())
 
 @dp.callback_query(lambda c: c.data == "trust")
 async def trust(call):
@@ -183,17 +177,10 @@ async def trust(call):
         "Ты учишься принимать решения сам.\n"
         "Это и есть главный навык трейдера 💼"
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
-
-# ---------- Покупка / переход ----------
+    await edit_message(call, text, back_kb())
 
 @dp.callback_query(lambda c: c.data == "buy")
 async def buy(call):
-    keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
-        [types.InlineKeyboardButton(text="🎓 Перейти к обучению", url=COURSES_BOT)],
-        [types.InlineKeyboardButton(text="⬅️ Назад", callback_data="back")]
-    ])
-
     text = (
         "💳 *Доступ к обучению*\n\n"
         "Обучение проходит в отдельном боте.\n\n"
@@ -203,9 +190,11 @@ async def buy(call):
         "📊 разборы\n\n"
         "Нажми кнопку ниже 👇"
     )
-    await call.message.edit_text(text, reply_markup=keyboard)
-
-# ---------- Контакты ----------
+    keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
+        [types.InlineKeyboardButton(text="🎓 Перейти к обучению", url=COURSES_BOT)],
+        [types.InlineKeyboardButton(text="⬅️ Назад", callback_data="back")]
+    ])
+    await edit_message(call, text, keyboard)
 
 @dp.callback_query(lambda c: c.data == "contact")
 async def contact(call):
@@ -216,10 +205,9 @@ async def contact(call):
         "Мы не продаём мечты.\n"
         "Мы обучаем мышлению 🧠"
     )
-    await call.message.edit_text(text, reply_markup=back_kb())
+    await edit_message(call, text, back_kb())
 
 # ---------- Запуск ----------
-
 async def main():
     await dp.start_polling(bot)
 
