@@ -34,10 +34,12 @@ def courses_menu():
     ])
 
 def payment_menu(course_id):
+    prices = {1: "5 000 ₽", 2: "15 000 ₽", 3: "25 000 ₽"}
+    price = prices.get(course_id, "Неизвестно")
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("💳 Оплатить USDT", callback_data=f"pay_usdt_{course_id}")],
-        [InlineKeyboardButton("₽ Оплатить в рублях", callback_data=f"pay_rub_{course_id}")],
+        [InlineKeyboardButton(f"💳 Оплатить {price}", callback_data=f"pay_rub_{course_id}")],
         [InlineKeyboardButton("👨‍💼 Написать менеджеру", url=SUPPORT)],
+        [InlineKeyboardButton("ℹ️ О курсе", callback_data=f"info_{course_id}")],
         [InlineKeyboardButton("🔙 Назад", callback_data="back")]
     ])
 
@@ -94,6 +96,9 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         new_screen = data
     elif data == "support":
         new_screen = "support"
+    elif data.startswith("info_"):
+        course_id = int(data.split("_")[1])
+        await send_course_info(query, course_id)
 
     if new_screen:
         user_states[user_id].append(new_screen)
@@ -171,11 +176,12 @@ async def show_menu(query, menu_id):
     # Оплата
     elif menu_id.startswith("pay_"):
         parts = menu_id.split("_")
-        currency = "USDT" if parts[1] == "usdt" else "рублях"
-        course_id = parts[2]
+        course_id = int(parts[2])
+        prices = {1: "5 000 ₽", 2: "15 000 ₽", 3: "25 000 ₽"}
+        price = prices.get(course_id, "Неизвестно")
         await query.edit_message_caption(
             caption=(f"💳 <b>Оплата курса {course_id}</b>\n\n"
-                     f"Способ: {currency}\n\n"
+                     f"Стоимость: {price}\n\n"
                      "Для оплаты напишите менеджеру."),
             parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup([
@@ -193,6 +199,20 @@ async def show_menu(query, menu_id):
             parse_mode="HTML",
             reply_markup=support_menu()
         )
+
+# ================== О КУРСЕ ==================
+
+async def send_course_info(query, course_id):
+    files = {
+        1: "presentation.pdf",
+        2: "presentation2.pdf",
+        3: "presentation3.pdf"
+    }
+    file_path = files.get(course_id)
+    if file_path and os.path.exists(file_path):
+        await query.message.reply_document(open(file_path, "rb"))
+    else:
+        await query.message.reply_text("Презентация не найдена.")
 
 # ================== ТЕКСТ ==================
 
