@@ -65,9 +65,10 @@ async def start(message: types.Message):
     )
 
     photo = types.FSInputFile(WELCOME_IMAGE)
-    await message.answer_photo(
+    sent_message = await message.reply_photo(
         photo=photo,
         caption=text,
+        parse_mode=ParseMode.MARKDOWN,
         reply_markup=main_menu()
     )
 
