@@ -11,6 +11,7 @@ CHANNEL_LINK = "https://t.me/quotextradenews"
 REVIEWS_CHANNEL = "https://t.me/+7FvjGCCQ4ng4MGM8"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
 CONTACT = "@quotexcompany_support"
+WELCOME_IMAGE = "start1.jpg"
 
 
 bot = Bot(
@@ -63,7 +64,13 @@ async def start(message: types.Message):
         "Выбери раздел ниже 👇"
     )
 
-    await message.answer(text, reply_markup=main_menu())
+    photo = types.FSInputFile(WELCOME_IMAGE)
+    await message.answer_photo(
+        photo=photo,
+        caption=text,
+        reply_markup=main_menu()
+    )
+
 
 # ---------- Универсальная кнопка Назад ----------
 
