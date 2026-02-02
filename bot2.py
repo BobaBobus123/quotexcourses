@@ -63,6 +63,8 @@ async def start(message: types.Message):
         "Выбери раздел ниже 👇"
     )
 
+    await message.answer(text, reply_markup=main_menu())
+
 # ---------- Универсальная кнопка Назад ----------
 
 def back_kb():
