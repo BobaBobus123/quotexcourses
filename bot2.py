@@ -7,7 +7,7 @@ from aiogram.filters import CommandStart
 
 TOKEN = os.environ.get("BOT_TOKEN")
 CHANNEL_LINK = "https://t.me/quotextradenews"
-REVIEWS_CHANNEL = "https://t.me/+7FvjGCCQ4ng4MGM8"
+REVIEWS_CHANNEL = "https://t.me/+1Fj0b3iyoXU2ODIy"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
 CONTACT = "@quotexcompany_support"
 WELCOME_IMAGE = "start1.jpg"
