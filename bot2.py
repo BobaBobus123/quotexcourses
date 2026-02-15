@@ -1,4 +1,6 @@
 import os
+import sqlite3
+from datetime import datetime
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 import asyncio
@@ -11,6 +13,23 @@ REVIEWS_CHANNEL = "https://t.me/+1Fj0b3iyoXU2ODIy"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
 CONTACT = "@quotexcompany_support"
 WELCOME_IMAGE = "start1.jpg"
+
+# ---------- БАЗА ДАННЫХ ----------
+conn = sqlite3.connect("users.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tg_id INTEGER UNIQUE,
+    username TEXT,
+    first_name TEXT,
+    ref_code TEXT,
+    registered_at TEXT
+)
+""")
+conn.commit()
+# --------------------------------
 
 bot = Bot(
     token=TOKEN,
@@ -46,9 +65,24 @@ def main_menu():
         ]
     ])
 
-# ---------- /start ----------
+# ---------- /start + регистрация ----------
 @dp.message(CommandStart())
 async def start(message: types.Message):
+    args = message.get_args()  # реф код
+    ref_code = args if args else None
+
+    tg_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
+    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    cursor.execute("""
+    INSERT OR IGNORE INTO users 
+    (tg_id, username, first_name, ref_code, registered_at)
+    VALUES (?, ?, ?, ?, ?)
+    """, (tg_id, username, first_name, ref_code, date))
+    conn.commit()
+
     text = (
         "🚀 *Quotex Crypto Academy*\n\n"
         "Добро пожаловать в образовательную платформу\n"
@@ -74,9 +108,9 @@ def back_kb():
     ])
 
 async def edit_message(call: types.CallbackQuery, text: str, keyboard: types.InlineKeyboardMarkup):
-    if call.message.photo:  # Если сообщение с фото
+    if call.message.photo:
         await call.message.edit_caption(caption=text, reply_markup=keyboard)
-    else:  # Если обычное текстовое
+    else:
         await call.message.edit_text(text=text, reply_markup=keyboard)
 
 @dp.callback_query(lambda c: c.data == "back")
