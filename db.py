@@ -18,7 +18,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-def add_user(user_id: int, referred_by: int | None = None):
+def add_user(user_id, username=None, referrer_id=None):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
