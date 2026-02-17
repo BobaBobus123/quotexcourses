@@ -9,12 +9,15 @@ from telegram.ext import (
     filters
 )
 
+from db import init_db, add_user
+
 TOKEN = os.environ.get("BOT_TOKEN")
 SUPPORT = "https://t.me/quotexcompany_support"
 WELCOME_IMAGE = "welcome.jpg"
 
+init_db()
+
 # ================== Состояние пользователей ==================
-# ключ: user_id, значение: стек меню (список экранов)
 user_states = {}
 
 # ================== КЛАВИАТУРЫ ==================
@@ -51,8 +54,13 @@ def support_menu():
 # ================== /START ==================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    user_states[user_id] = ["main"]  # стартовое меню
+    user = update.effective_user
+    args = context.args
+    referrer_id = int(args[0]) if args else None
+
+    add_user(user.id, user.username, referrer_id)
+
+    user_states[user.id] = ["main"]
 
     with open(WELCOME_IMAGE, "rb") as photo:
         await update.message.reply_photo(
@@ -78,14 +86,12 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_states:
         user_states[user_id] = ["main"]
 
-    # ===== Навигация назад =====
     if data == "back":
         if len(user_states[user_id]) > 1:
-            user_states[user_id].pop()  # убираем текущее меню
+            user_states[user_id].pop()
         await show_menu(query, user_states[user_id][-1])
         return
 
-    # ===== Переход на новый экран =====
     new_screen = None
 
     if data == "courses":
@@ -107,14 +113,12 @@ async def callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ================== Функция показа меню ==================
 
 async def show_menu(query, menu_id):
-    # Главное меню
     if menu_id == "main":
         await query.edit_message_caption(
             caption="👋 Выберите действие:",
             reply_markup=main_menu()
         )
 
-    # Курсы
     elif menu_id == "courses":
         await query.edit_message_caption(
             caption="🎓 <b>Наши курсы</b>\n\nВыберите подходящий уровень:",
@@ -122,7 +126,6 @@ async def show_menu(query, menu_id):
             reply_markup=courses_menu()
         )
 
-    # Курс 1
     elif menu_id == "course_1":
         text = (
             "🟢 <b>Курс 1: Криптотрейдинг с нуля</b>\n\n"
@@ -139,7 +142,6 @@ async def show_menu(query, menu_id):
             caption=text, parse_mode="HTML", reply_markup=payment_menu(1)
         )
 
-    # Курс 2
     elif menu_id == "course_2":
         text = (
             "🔵 <b>Курс 2: Профессиональный трейдинг</b>\n\n"
@@ -156,7 +158,6 @@ async def show_menu(query, menu_id):
             caption=text, parse_mode="HTML", reply_markup=payment_menu(2)
         )
 
-    # Курс 3
     elif menu_id == "course_3":
         text = (
             "🔴 <b>VIP Мастер трейдинга</b>\n\n"
@@ -173,7 +174,6 @@ async def show_menu(query, menu_id):
             caption=text, parse_mode="HTML", reply_markup=payment_menu(3)
         )
 
-    # Оплата
     elif menu_id.startswith("pay_"):
         parts = menu_id.split("_")
         course_id = int(parts[2])
@@ -190,7 +190,6 @@ async def show_menu(query, menu_id):
             ])
         )
 
-    # Поддержка
     elif menu_id == "support":
         await query.edit_message_caption(
             caption=("👨‍💼 <b>Поддержка</b>\n\n"

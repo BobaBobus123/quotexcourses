@@ -5,12 +5,16 @@ import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 
+from db import init_db, add_user
+
 TOKEN = os.environ.get("BOT_TOKEN")
 CHANNEL_LINK = "https://t.me/quotextradenews"
 REVIEWS_CHANNEL = "https://t.me/+1Fj0b3iyoXU2ODIy"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
 CONTACT = "@quotexcompany_support"
 WELCOME_IMAGE = "start1.jpg"
+
+init_db()
 
 bot = Bot(
     token=TOKEN,
@@ -49,6 +53,15 @@ def main_menu():
 # ---------- /start ----------
 @dp.message(CommandStart())
 async def start(message: types.Message):
+    args = message.text.split()
+    referrer_id = int(args[1]) if len(args) > 1 else None
+
+    add_user(
+        user_id=message.from_user.id,
+        username=message.from_user.username,
+        referrer_id=referrer_id
+    )
+
     text = (
         "🚀 *Quotex Crypto Academy*\n\n"
         "Добро пожаловать в образовательную платформу\n"
@@ -74,9 +87,9 @@ def back_kb():
     ])
 
 async def edit_message(call: types.CallbackQuery, text: str, keyboard: types.InlineKeyboardMarkup):
-    if call.message.photo:  # Если сообщение с фото
+    if call.message.photo:
         await call.message.edit_caption(caption=text, reply_markup=keyboard)
-    else:  # Если обычное текстовое
+    else:
         await call.message.edit_text(text=text, reply_markup=keyboard)
 
 @dp.callback_query(lambda c: c.data == "back")
