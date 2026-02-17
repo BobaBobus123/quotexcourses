@@ -29,7 +29,7 @@ def add_user(user_id, username=None, referrer_id=None):
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor.execute(
             "INSERT INTO users (user_id, referred_by, first_visit) VALUES (?, ?, ?)",
-            (user_id, referred_by, now)
+            (user_id, referrer_id, now)  # <- исправлено на referrer_id
         )
         conn.commit()
 
