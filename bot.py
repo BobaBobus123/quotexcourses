@@ -58,7 +58,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     referrer_id = int(args[0]) if args else None
 
-    add_user(user.id, user.username, referrer_id)
+    add_user(user.id, referrer_id)
 
     user_states[user.id] = ["main"]
 
