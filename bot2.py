@@ -1,25 +1,28 @@
 import os
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
 import asyncio
 from aiogram import Bot, Dispatcher, types
+from aiogram.enums import ParseMode
+from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandStart
 
 from db import init_db, add_user
 
+# ---------- Переменные окружения ----------
 TOKEN = os.environ.get("BOT_TOKEN_1")
+if not TOKEN:
+    raise RuntimeError("❌ BOT_TOKEN_1 не задан! Проверь Environment Variables.")
+
 CHANNEL_LINK = "https://t.me/quotextradenews"
 REVIEWS_CHANNEL = "https://t.me/+1Fj0b3iyoXU2ODIy"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
 CONTACT = "@quotexcompany_support"
 WELCOME_IMAGE = "start1.jpg"
 
+# ---------- Инициализация БД ----------
 init_db()
 
-bot = Bot(
-    token=TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN)
-)
+# ---------- Бот и диспетчер ----------
+bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 dp = Dispatcher()
 
 # ---------- Главное меню ----------
@@ -56,6 +59,7 @@ async def start(message: types.Message):
     args = message.text.split()
     referrer_id = int(args[1]) if len(args) > 1 else None
 
+    # ✅ Добавляем пользователя, теперь add_user принимает username и referrer_id
     add_user(
         user_id=message.from_user.id,
         username=message.from_user.username,
@@ -80,7 +84,7 @@ async def start(message: types.Message):
         reply_markup=main_menu()
     )
 
-# ---------- Универсальная кнопка Назад ----------
+# ---------- Кнопка Назад ----------
 def back_kb():
     return types.InlineKeyboardMarkup(inline_keyboard=[
         [types.InlineKeyboardButton(text="⬅️ Назад в меню", callback_data="back")]
