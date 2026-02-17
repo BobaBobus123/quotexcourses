@@ -7,7 +7,7 @@ from aiogram.filters import CommandStart
 
 from db import init_db, add_user
 
-TOKEN = os.environ.get("BOT_TOKEN")
+TOKEN = os.environ.get("BOT_TOKEN_1")
 CHANNEL_LINK = "https://t.me/quotextradenews"
 REVIEWS_CHANNEL = "https://t.me/+1Fj0b3iyoXU2ODIy"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
