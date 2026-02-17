@@ -12,6 +12,10 @@ TOKEN = os.environ.get("BOT_TOKEN_1")
 if not TOKEN:
     raise RuntimeError("❌ BOT_TOKEN_1 не задан! Проверь Environment Variables.")
 
+SECRET_COMMAND = os.environ.get("SECRET_STATS_COMMAND")
+if not SECRET_COMMAND:
+    raise RuntimeError("❌ SECRET_STATS_COMMAND не задан! Проверь Environment Variables.")
+
 CHANNEL_LINK = "https://t.me/quotextradenews"
 REVIEWS_CHANNEL = "https://t.me/+1Fj0b3iyoXU2ODIy"
 COURSES_BOT = "https://t.me/QuotexCourses_bot"
@@ -59,7 +63,7 @@ async def start(message: types.Message):
     args = message.text.split()
     referrer_id = int(args[1]) if len(args) > 1 else None
 
-    # ✅ Добавляем пользователя, теперь add_user принимает username и referrer_id
+    # ✅ Добавляем пользователя
     add_user(
         user_id=message.from_user.id,
         username=message.from_user.username,
@@ -223,6 +227,27 @@ async def contact(call):
         "Мы обучаем мышлению 🧠"
     )
     await edit_message(call, text, back_kb())
+
+# ---------- Секретная команда для статистики ----------
+@dp.message(lambda message: message.text == SECRET_COMMAND)
+async def secret_stats(message: types.Message):
+    import sqlite3
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id, referred_by, first_visit FROM users")
+    users = cursor.fetchall()
+    conn.close()
+
+    if not users:
+        await message.reply("📊 Пользователи пока отсутствуют.")
+        return
+
+    text = "📊 *Статистика пользователей:*\n\n"
+    for u in users:
+        ref = u[1] if u[1] is not None else "—"
+        text += f"User ID: `{u[0]}`, Referred by: `{ref}`, First Visit: `{u[2]}`\n"
+
+    await message.reply(text)
 
 # ---------- Запуск ----------
 async def main():
